@@ -1,0 +1,10 @@
+*.pyc
+*.iml
+.idea\*
+*/cmake*
+*.cmake
+*.txt
+*.bin
+*.cbp
+*.exe
+*.c
