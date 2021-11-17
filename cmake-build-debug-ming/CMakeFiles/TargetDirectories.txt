@@ -1,3 +1,0 @@
-C:/Users/sadra/Desktop/Checkers/src/checkers-cpp/cmake-build-debug-ming/CMakeFiles/Checker_Teacher.dir
-C:/Users/sadra/Desktop/Checkers/src/checkers-cpp/cmake-build-debug-ming/CMakeFiles/edit_cache.dir
-C:/Users/sadra/Desktop/Checkers/src/checkers-cpp/cmake-build-debug-ming/CMakeFiles/rebuild_cache.dir
