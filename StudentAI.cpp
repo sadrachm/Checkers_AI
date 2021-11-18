@@ -31,6 +31,8 @@ Move StudentAI::GetMove(Move move)
         for (int b = 0; b < moves[a].size(); b++) {
             double newValue = MCTS(moves[a][b], player == 2 ? true : false);
             if (newValue >= value) {
+                //cout << newValue << endl;
+                value = newValue;
                 bestMove = moves[a][b];
             }
 //            moveCount = turn;
@@ -45,6 +47,7 @@ Move StudentAI::GetMove(Move move)
 //            board.Undo();
         }
     }
+    //cout << "WE Went with " << value << endl;
     board.makeMove(bestMove,player);
     return bestMove;
 
@@ -110,11 +113,12 @@ int StudentAI::MiniMax (Move move, bool mainPlayer) {
 */
 
 double StudentAI::MCTS (Move move, bool mainPlayer) {
+    bool goodplayer = mainPlayer;
     int count = 0;
-    int value = 0;
-    int total = 0;
+    double value = 0;
+    double total = 0;
     board.makeMove(move, mainPlayer ? 2 : 1);
-    while (count < 1) {
+    while (count < 100) {
         int numOfMoves = 0;
         while (!board.isWin(player)) {
             vector<vector<Move>> x = board.getAllPossibleMoves(mainPlayer ? 1 : 2);
@@ -126,8 +130,8 @@ double StudentAI::MCTS (Move move, bool mainPlayer) {
             mainPlayer = !mainPlayer;
             numOfMoves++;
         }
-        int x = board.isWin(player);
-        if (x == 1) {
+        int x = board.isWin(goodplayer ? 2 : 1);
+        if (x == player) {
             value += 1;
             total += 1;
         } else {
@@ -139,6 +143,7 @@ double StudentAI::MCTS (Move move, bool mainPlayer) {
 
         count++;
     }
+    //cout << value << " " << total << endl;
     board.Undo();
     return value/total;
 }
