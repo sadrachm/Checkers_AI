@@ -8,3 +8,5 @@
 *.cbp
 *.exe
 *.c
+*.log
+*Makefile
