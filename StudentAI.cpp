@@ -22,23 +22,27 @@ Move StudentAI::GetMove(Move move)
     }
     turn += 1;
     vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-    Move bestMove = moves[1][0];
-    MCTS(bestMove, player ==2 ? true: false);
-    int maxHeuristic = -100;
-    int minHeuristic = 100;
-    int temp;
+    Move bestMove;
+//    int maxHeuristic = -100;
+//    int minHeuristic = 100;
+//    int temp;
+    double value = 0;
     for (int a = 0; a < moves.size(); a++) {
         for (int b = 0; b < moves[a].size(); b++) {
-            moveCount = turn;
-            temp = MiniMax(moves[a][b], player==2 ? true : false);
-            if (temp > maxHeuristic && player == 1) {
+            double newValue = MCTS(moves[a][b], player == 2 ? true : false);
+            if (newValue >= value) {
                 bestMove = moves[a][b];
-                maxHeuristic = temp;
-            } else if (temp < minHeuristic && player == 2){
-                bestMove = moves[a][b];
-                minHeuristic = temp;
             }
-            board.Undo();
+//            moveCount = turn;
+//            temp = MiniMax(moves[a][b], player==2 ? true : false);
+//            if (temp > maxHeuristic && player == 1) {
+//                bestMove = moves[a][b];
+//                maxHeuristic = temp;
+//            } else if (temp < minHeuristic && player == 2){
+//                bestMove = moves[a][b];
+//                minHeuristic = temp;
+//            }
+//            board.Undo();
         }
     }
     board.makeMove(bestMove,player);
@@ -100,12 +104,16 @@ int StudentAI::MiniMax (Move move, bool mainPlayer) {
     return 0;
 }
 
-int StudentAI::MCTS (Move move, bool mainPlayer) {
+/* -------------Ideas------------------
+ * Mark the node as explored to not repeat
+
+*/
+
+double StudentAI::MCTS (Move move, bool mainPlayer) {
     int count = 0;
     int value = 0;
     int total = 0;
     board.makeMove(move, mainPlayer ? 2 : 1);
-    board.showBoard();
     while (count < 1) {
         int numOfMoves = 0;
         while (!board.isWin(player)) {
@@ -115,13 +123,8 @@ int StudentAI::MCTS (Move move, bool mainPlayer) {
             int j = rand() % (checker_moves.size());
             Move res = checker_moves[j];
             board.makeMove(res,mainPlayer ? 1 : 2);
-            board.showBoard();
             mainPlayer = !mainPlayer;
             numOfMoves++;
-        }
-        for (int a = 0; a < numOfMoves; a++) {
-            board.Undo();
-            board.showBoard();
         }
         int x = board.isWin(player);
         if (x == 1) {
@@ -130,11 +133,12 @@ int StudentAI::MCTS (Move move, bool mainPlayer) {
         } else {
             total += 1;
         }
+        for (int a = 0; a < numOfMoves; a++) {
+            board.Undo();
+        }
 
         count++;
     }
     board.Undo();
-    board.showBoard();
-    throw;
-    return 0;
+    return value/total;
 }
