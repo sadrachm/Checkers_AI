@@ -14,7 +14,8 @@ public:
     virtual Move GetMove(Move board);
     virtual int goodPieces(bool mainPlayer);
     virtual int MiniMax(Move board, bool mainPlayer);
-    virtual double MCTS(Move board, bool mainPlayer);
+    virtual Move MCTS(Move board);
+    virtual int Simulate(bool mainPlayer);
 };
 
 #endif //STUDENTAI_H

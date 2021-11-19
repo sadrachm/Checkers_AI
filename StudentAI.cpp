@@ -1,6 +1,8 @@
 #include "StudentAI.h"
 #include <random>
 
+//Works only if our program is Player 2
+
 //The following part should be completed by students.
 //The students can modify anything except the class name and exisiting functions and varibles.
 StudentAI::StudentAI(int col,int row,int p)
@@ -21,37 +23,97 @@ Move StudentAI::GetMove(Move move)
         board.makeMove(move,player == 1?2:1);
     }
     turn += 1;
-    vector<vector<Move> > moves = board.getAllPossibleMoves(player);
-    Move bestMove;
-//    int maxHeuristic = -100;
-//    int minHeuristic = 100;
-//    int temp;
-    double value = 0;
-    for (int a = 0; a < moves.size(); a++) {
-        for (int b = 0; b < moves[a].size(); b++) {
-            double newValue = MCTS(moves[a][b], player == 2 ? true : false);
-            if (newValue >= value) {
-                //cout << newValue << endl;
-                value = newValue;
-                bestMove = moves[a][b];
-            }
-//            moveCount = turn;
-//            temp = MiniMax(moves[a][b], player==2 ? true : false);
-//            if (temp > maxHeuristic && player == 1) {
-//                bestMove = moves[a][b];
-//                maxHeuristic = temp;
-//            } else if (temp < minHeuristic && player == 2){
-//                bestMove = moves[a][b];
-//                minHeuristic = temp;
-//            }
-//            board.Undo();
-        }
+    if (player == 1) {
+        vector<vector<Move>> x = board.getAllPossibleMoves(player);
+        int i = rand() % (x.size());
+        vector<Move> checker_moves = x[i];
+        int j = rand() % (checker_moves.size());
+        Move res = checker_moves[j];
+        board.makeMove(res,player);
+        return res;
+
     }
-    //cout << "WE Went with " << value << endl;
+    Move bestMove = MCTS(move);
     board.makeMove(bestMove,player);
     return bestMove;
 
 
+}
+
+/* -------------Ideas------------------
+ * Mark the node as explored to not repeat
+
+*/
+
+int StudentAI::Simulate(bool mainPlayer) {
+    int numOfMoves = 0;
+    int win = 0;
+    while (!board.isWin(player)) {
+        vector<vector<Move>> x = board.getAllPossibleMoves(mainPlayer ? 1 : 2);
+        int i = rand() % (x.size());
+        vector<Move> checker_moves = x[i];
+        int j = rand() % (checker_moves.size());
+        Move res = checker_moves[j];
+        board.makeMove(res,mainPlayer ? 1 : 2);
+        mainPlayer = !mainPlayer;
+        numOfMoves++;
+    }
+    if (goodPieces(true) == 0) {
+        win = 1;
+    }
+    for (int a = 0; a < numOfMoves; a++) {
+        board.Undo();
+    }
+    return win;
+}
+
+
+Move StudentAI::MCTS (Move move) {
+    vector<vector<Move> > moves = board.getAllPossibleMoves(player);
+    Move bestMove;
+    int count = 0;
+    vector<int> values;
+    while (count < 600) {
+        int position = 0;
+        for (int a = 0; a < moves.size(); a++) {
+            for (int b = 0; b < moves[a].size(); b++) {
+                board.makeMove(moves[a][b], 2);
+                int newValue = Simulate(true);
+                if (values.size() < position+1) {
+                    values.push_back(newValue);
+                } else {
+                    values[position] += newValue;
+                }
+                board.Undo();
+                position++;
+                count++;
+            }
+        }
+    }
+    int max = 0;
+    int position = 0;
+    for (int a = 0; a < values.size(); a++) {
+        if (values[a] > max) {
+            max = values[a];
+            position = a;
+        } else if (values[a] == max) {
+            int i = rand() % 10;
+            if (i > 5) {
+                max = values[a];
+                position = a;
+            }
+        }
+    }
+    count = 0;
+    for (int a = 0; a < moves.size(); a++) {
+        for (int b = 0; b < moves[a].size(); b++) {
+            if (count == position) {
+                bestMove = moves[a][b];
+            }
+            count++;
+        }
+    }
+    return bestMove;
 }
 
 int StudentAI::goodPieces (bool mainPlayer) {
@@ -105,45 +167,4 @@ int StudentAI::MiniMax (Move move, bool mainPlayer) {
         return minima;
     }
     return 0;
-}
-
-/* -------------Ideas------------------
- * Mark the node as explored to not repeat
-
-*/
-
-double StudentAI::MCTS (Move move, bool mainPlayer) {
-    bool goodplayer = mainPlayer;
-    int count = 0;
-    double value = 0;
-    double total = 0;
-    board.makeMove(move, mainPlayer ? 2 : 1);
-    while (count < 100) {
-        int numOfMoves = 0;
-        while (!board.isWin(player)) {
-            vector<vector<Move>> x = board.getAllPossibleMoves(mainPlayer ? 1 : 2);
-            int i = rand() % (x.size());
-            vector<Move> checker_moves = x[i];
-            int j = rand() % (checker_moves.size());
-            Move res = checker_moves[j];
-            board.makeMove(res,mainPlayer ? 1 : 2);
-            mainPlayer = !mainPlayer;
-            numOfMoves++;
-        }
-        int x = board.isWin(goodplayer ? 2 : 1);
-        if (x == player) {
-            value += 1;
-            total += 1;
-        } else {
-            total += 1;
-        }
-        for (int a = 0; a < numOfMoves; a++) {
-            board.Undo();
-        }
-
-        count++;
-    }
-    //cout << value << " " << total << endl;
-    board.Undo();
-    return value/total;
 }
